@@ -1,0 +1,114 @@
+# 0-memory Schema Graph
+#
+# Defines the canonical memory record structure for agent-native memory.
+# The schema is represented as executable graph constants so it can be
+# content-addressed, versioned, and reused by compiler/runtime components.
+#
+# Compatible with 0-openclaw runtime (uses only Constant + Operation nodes).
+
+Graph {
+    "name": "zero_memory_schema_v1",
+    "version": 1,
+    "description": "Canonical 0-memory schema for concepts, relations, and context",
+
+    "nodes": [
+        {
+            "id": "schema_version",
+            "type": "Operation",
+            "op": "CreateMap",
+            "inputs": [],
+            "params": { "schema_version": "0-memory/1.0" }
+        },
+        {
+            "id": "concept_schema",
+            "type": "Constant",
+            "value": {
+                "kind": "concept",
+                "id_strategy": "sha256(normalized_label)",
+                "required": [
+                    "concept_hash",
+                    "label",
+                    "aliases",
+                    "confidence",
+                    "created_at",
+                    "updated_at"
+                ],
+                "optional": ["attributes", "embedding_ref", "source_refs"]
+            }
+        },
+        {
+            "id": "relation_schema",
+            "type": "Constant",
+            "value": {
+                "kind": "relation",
+                "id_strategy": "sha256(subject_label + predicate + object_label)",
+                "required": [
+                    "fact_hash",
+                    "episode_hash",
+                    "subject_hash",
+                    "predicate",
+                    "object_hash",
+                    "confidence",
+                    "context_hash",
+                    "created_at"
+                ],
+                "optional": ["causal_weight", "temporal_weight", "source_refs"]
+            }
+        },
+        {
+            "id": "context_schema",
+            "type": "Constant",
+            "value": {
+                "kind": "context",
+                "id_strategy": "sha256(event_time + source + scope)",
+                "required": [
+                    "context_hash",
+                    "event_time",
+                    "source",
+                    "scope"
+                ],
+                "optional": ["session_id", "agent_id", "channel", "metadata"]
+            }
+        },
+        {
+            "id": "memory_record_schema",
+            "type": "Constant",
+            "value": {
+                "kind": "memory_record",
+                "required": [
+                    "record_hash",
+                    "concepts",
+                    "relations",
+                    "context",
+                    "proof"
+                ],
+                "proof": {
+                    "trace_hash": "execution trace hash",
+                    "signer": "agent identity",
+                    "signature": "proof-carrying execution signature"
+                }
+            }
+        },
+        {
+            "id": "output",
+            "type": "Operation",
+            "op": "MergeMap",
+            "inputs": [
+                "schema_version",
+                "concept_schema",
+                "relation_schema",
+                "context_schema",
+                "memory_record_schema"
+            ]
+        }
+    ],
+
+    "entry_point": "schema_version",
+    "outputs": ["output"],
+
+    "metadata": {
+        "author": "0-memory",
+        "created": "2026-02-18",
+        "tags": ["memory", "schema", "0-memory", "0-lang"]
+    }
+}

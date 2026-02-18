@@ -13,8 +13,8 @@ memory as executable, content-addressed graph records.
 
 ## Directory Contents
 
-- `schema.0`: canonical schema graph for 0-memory records.
-- `example_memory.0`: compiled memory example from the 0-memory user request.
+- `schema/schema.0`: canonical schema graph for 0-memory records.
+- `examples/example_memory.0`: compiled memory example from the 0-memory user request.
 
 ## Core Data Model
 
@@ -42,7 +42,7 @@ memory as executable, content-addressed graph records.
    - hash operations
    - relation constants referencing concept hashes
    - context constant + context hash
-   - proof placeholder + aggregate output
+   - proof placeholder + MergeMap output
 5. Store resulting graph record in persistent chain/state.
 
 ## Storage and Recall Strategy

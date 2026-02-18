@@ -1,0 +1,202 @@
+# 0-memory Example Memory Graph
+#
+# Demonstrates how a natural-language request can be compiled into
+# concept/relation/context memory primitives in 0-lang form.
+#
+# Compatible with 0-openclaw runtime (uses only Constant + Operation nodes).
+# MergeMap requires all inputs to be Value::Map — string and hash values
+# are wrapped via SetField to satisfy this constraint.
+
+Graph {
+    "name": "zero_memory_example_20260218",
+    "version": 1,
+    "description": "Compiled memory graph from 0-memory idea request",
+
+    "nodes": [
+        # --- Raw utterance (wrapped as Map via CreateMap) ---
+        {
+            "id": "raw_utterance",
+            "type": "Operation",
+            "op": "CreateMap",
+            "inputs": [],
+            "params": {
+                "raw_utterance": "Build 0-memory, a native agent memory system that is lightweight, efficient, and compiled with 0-lang."
+            }
+        },
+
+        # --- Concept labels (String constants, used as Hash inputs) ---
+        { "id": "concept_agent", "type": "Constant", "value": "Agent" },
+        { "id": "concept_memory", "type": "Constant", "value": "LongTermMemory" },
+        { "id": "concept_0memory", "type": "Constant", "value": "0-memory" },
+        { "id": "concept_0lang", "type": "Constant", "value": "0-lang" },
+        { "id": "concept_rag", "type": "Constant", "value": "RAG" },
+        { "id": "concept_graph", "type": "Constant", "value": "ExecutableGraphMemory" },
+
+        # --- Content-addressed concept hashes ---
+        { "id": "hash_agent", "type": "Operation", "op": "Hash", "inputs": ["concept_agent"] },
+        { "id": "hash_memory", "type": "Operation", "op": "Hash", "inputs": ["concept_memory"] },
+        { "id": "hash_0memory", "type": "Operation", "op": "Hash", "inputs": ["concept_0memory"] },
+        { "id": "hash_0lang", "type": "Operation", "op": "Hash", "inputs": ["concept_0lang"] },
+        { "id": "hash_rag", "type": "Operation", "op": "Hash", "inputs": ["concept_rag"] },
+        { "id": "hash_graph", "type": "Operation", "op": "Hash", "inputs": ["concept_graph"] },
+
+        # --- Empty map base for SetField wrappers ---
+        {
+            "id": "empty_map",
+            "type": "Operation",
+            "op": "CreateMap",
+            "inputs": [],
+            "params": {}
+        },
+
+        # --- Wrap each concept hash into a named Map field ---
+        { "id": "wrap_hash_agent", "type": "Operation", "op": "SetField", "inputs": ["empty_map", "hash_agent"], "params": { "field": "hash_agent" } },
+        { "id": "wrap_hash_memory", "type": "Operation", "op": "SetField", "inputs": ["empty_map", "hash_memory"], "params": { "field": "hash_memory" } },
+        { "id": "wrap_hash_0memory", "type": "Operation", "op": "SetField", "inputs": ["empty_map", "hash_0memory"], "params": { "field": "hash_0memory" } },
+        { "id": "wrap_hash_0lang", "type": "Operation", "op": "SetField", "inputs": ["empty_map", "hash_0lang"], "params": { "field": "hash_0lang" } },
+        { "id": "wrap_hash_rag", "type": "Operation", "op": "SetField", "inputs": ["empty_map", "hash_rag"], "params": { "field": "hash_rag" } },
+        { "id": "wrap_hash_graph", "type": "Operation", "op": "SetField", "inputs": ["empty_map", "hash_graph"], "params": { "field": "hash_graph" } },
+
+        # --- Concept hashes sub-map ---
+        {
+            "id": "concept_hashes",
+            "type": "Operation",
+            "op": "MergeMap",
+            "inputs": [
+                "wrap_hash_agent",
+                "wrap_hash_memory",
+                "wrap_hash_0memory",
+                "wrap_hash_0lang",
+                "wrap_hash_rag",
+                "wrap_hash_graph"
+            ]
+        },
+
+        # --- Wrap concept_hashes under a "concepts" key ---
+        { "id": "concepts_section", "type": "Operation", "op": "SetField", "inputs": ["empty_map", "concept_hashes"], "params": { "field": "concepts" } },
+
+        # --- Context block (already a Map) ---
+        {
+            "id": "context",
+            "type": "Constant",
+            "value": {
+                "event_time": "20260218T000000Z",
+                "source": "user_prompt",
+                "scope": "0-memory_design",
+                "language": "zh-CN",
+                "objective": "native_agent_memory"
+            }
+        },
+        { "id": "context_hash", "type": "Operation", "op": "Hash", "inputs": ["context"] },
+
+        # --- Wrap context and context_hash ---
+        { "id": "wrap_context", "type": "Operation", "op": "SetField", "inputs": ["empty_map", "context"], "params": { "field": "context" } },
+        { "id": "wrap_context_hash", "type": "Operation", "op": "SetField", "inputs": ["empty_map", "context_hash"], "params": { "field": "context_hash" } },
+
+        # --- Relations (each is a Map constant, wrapped under unique keys) ---
+        {
+            "id": "rel_agent_needs_memory",
+            "type": "Constant",
+            "value": {
+                "subject_hash_ref": "hash_agent",
+                "predicate": "needs",
+                "object_hash_ref": "hash_memory",
+                "confidence": 0.98
+            }
+        },
+        {
+            "id": "rel_0memory_targets_memory",
+            "type": "Constant",
+            "value": {
+                "subject_hash_ref": "hash_0memory",
+                "predicate": "solves",
+                "object_hash_ref": "hash_memory",
+                "confidence": 0.97
+            }
+        },
+        {
+            "id": "rel_0memory_compiled_with_0lang",
+            "type": "Constant",
+            "value": {
+                "subject_hash_ref": "hash_0memory",
+                "predicate": "compiled_with",
+                "object_hash_ref": "hash_0lang",
+                "confidence": 0.99
+            }
+        },
+        {
+            "id": "rel_0memory_not_only_rag",
+            "type": "Constant",
+            "value": {
+                "subject_hash_ref": "hash_0memory",
+                "predicate": "extends_beyond",
+                "object_hash_ref": "hash_rag",
+                "confidence": 0.94
+            }
+        },
+        {
+            "id": "rel_0memory_uses_graph_memory",
+            "type": "Constant",
+            "value": {
+                "subject_hash_ref": "hash_0memory",
+                "predicate": "uses",
+                "object_hash_ref": "hash_graph",
+                "confidence": 0.96
+            }
+        },
+
+        # --- Wrap each relation under a unique key ---
+        { "id": "wrap_rel_1", "type": "Operation", "op": "SetField", "inputs": ["empty_map", "rel_agent_needs_memory"], "params": { "field": "rel_agent_needs_memory" } },
+        { "id": "wrap_rel_2", "type": "Operation", "op": "SetField", "inputs": ["empty_map", "rel_0memory_targets_memory"], "params": { "field": "rel_0memory_targets_memory" } },
+        { "id": "wrap_rel_3", "type": "Operation", "op": "SetField", "inputs": ["empty_map", "rel_0memory_compiled_with_0lang"], "params": { "field": "rel_0memory_compiled_with_0lang" } },
+        { "id": "wrap_rel_4", "type": "Operation", "op": "SetField", "inputs": ["empty_map", "rel_0memory_not_only_rag"], "params": { "field": "rel_0memory_not_only_rag" } },
+        { "id": "wrap_rel_5", "type": "Operation", "op": "SetField", "inputs": ["empty_map", "rel_0memory_uses_graph_memory"], "params": { "field": "rel_0memory_uses_graph_memory" } },
+
+        # --- Relations sub-map ---
+        {
+            "id": "relations_section",
+            "type": "Operation",
+            "op": "MergeMap",
+            "inputs": ["wrap_rel_1", "wrap_rel_2", "wrap_rel_3", "wrap_rel_4", "wrap_rel_5"]
+        },
+
+        # --- Wrap relations under a "relations" key ---
+        { "id": "wrap_relations", "type": "Operation", "op": "SetField", "inputs": ["empty_map", "relations_section"], "params": { "field": "relations" } },
+
+        # --- Proof (already a Map) ---
+        {
+            "id": "proof",
+            "type": "Constant",
+            "value": {
+                "trace_hash": "pending_runtime_trace_hash",
+                "signer": "0-memory-compiler",
+                "signature": "pending_runtime_signature"
+            }
+        },
+        { "id": "wrap_proof", "type": "Operation", "op": "SetField", "inputs": ["empty_map", "proof"], "params": { "field": "proof" } },
+
+        # --- Final output: merge all Map sections ---
+        {
+            "id": "output",
+            "type": "Operation",
+            "op": "MergeMap",
+            "inputs": [
+                "raw_utterance",
+                "concepts_section",
+                "wrap_context",
+                "wrap_context_hash",
+                "wrap_relations",
+                "wrap_proof"
+            ]
+        }
+    ],
+
+    "entry_point": "concept_agent",
+    "outputs": ["output"],
+
+    "metadata": {
+        "author": "0-memory",
+        "created": "2026-02-18",
+        "tags": ["memory", "example", "compile", "0-memory"]
+    }
+}
