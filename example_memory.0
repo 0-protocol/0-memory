@@ -1,0 +1,142 @@
+# 0-memory Example Memory Graph
+#
+# Demonstrates how a natural-language request can be compiled into
+# concept/relation/context memory primitives in 0-lang form.
+
+Graph {
+    name: "zero_memory_example_20260218",
+    version: 1,
+    description: "Compiled memory graph from 0-memory idea request",
+
+    nodes: [
+        {
+            id: "raw_utterance",
+            type: Constant,
+            value: "Build 0-memory, a native agent memory system that is lightweight, efficient, and compiled with 0-lang."
+        },
+
+        # Concept labels
+        { id: "concept_agent", type: Constant, value: "Agent" },
+        { id: "concept_memory", type: Constant, value: "LongTermMemory" },
+        { id: "concept_0memory", type: Constant, value: "0-memory" },
+        { id: "concept_0lang", type: Constant, value: "0-lang" },
+        { id: "concept_rag", type: Constant, value: "RAG" },
+        { id: "concept_graph", type: Constant, value: "ExecutableGraphMemory" },
+
+        # Content-addressed concept hashes
+        { id: "hash_agent", type: Operation, op: Hash, inputs: ["concept_agent"] },
+        { id: "hash_memory", type: Operation, op: Hash, inputs: ["concept_memory"] },
+        { id: "hash_0memory", type: Operation, op: Hash, inputs: ["concept_0memory"] },
+        { id: "hash_0lang", type: Operation, op: Hash, inputs: ["concept_0lang"] },
+        { id: "hash_rag", type: Operation, op: Hash, inputs: ["concept_rag"] },
+        { id: "hash_graph", type: Operation, op: Hash, inputs: ["concept_graph"] },
+
+        # Context block
+        {
+            id: "context",
+            type: Constant,
+            value: {
+                event_time: "2026-02-18T00:00:00Z",
+                source: "user_prompt",
+                scope: "0-memory_design",
+                language: "zh-CN",
+                objective: "native_agent_memory"
+            }
+        },
+        { id: "context_hash", type: Operation, op: Hash, inputs: ["context"] },
+
+        # Relations (subject, predicate, object, confidence)
+        {
+            id: "rel_agent_needs_memory",
+            type: Constant,
+            value: {
+                subject_hash_ref: "hash_agent",
+                predicate: "needs",
+                object_hash_ref: "hash_memory",
+                confidence: 0.98
+            }
+        },
+        {
+            id: "rel_0memory_targets_memory",
+            type: Constant,
+            value: {
+                subject_hash_ref: "hash_0memory",
+                predicate: "solves",
+                object_hash_ref: "hash_memory",
+                confidence: 0.97
+            }
+        },
+        {
+            id: "rel_0memory_compiled_with_0lang",
+            type: Constant,
+            value: {
+                subject_hash_ref: "hash_0memory",
+                predicate: "compiled_with",
+                object_hash_ref: "hash_0lang",
+                confidence: 0.99
+            }
+        },
+        {
+            id: "rel_0memory_not_only_rag",
+            type: Constant,
+            value: {
+                subject_hash_ref: "hash_0memory",
+                predicate: "extends_beyond",
+                object_hash_ref: "hash_rag",
+                confidence: 0.94
+            }
+        },
+        {
+            id: "rel_0memory_uses_graph_memory",
+            type: Constant,
+            value: {
+                subject_hash_ref: "hash_0memory",
+                predicate: "uses",
+                object_hash_ref: "hash_graph",
+                confidence: 0.96
+            }
+        },
+
+        # Proof and aggregation
+        {
+            id: "proof",
+            type: Constant,
+            value: {
+                trace_hash: "pending_runtime_trace_hash",
+                signer: "agent://0-memory-compiler",
+                signature: "pending_runtime_signature"
+            }
+        },
+        {
+            id: "output",
+            type: Aggregate,
+            inputs: [
+                "raw_utterance",
+                "hash_agent",
+                "hash_memory",
+                "hash_0memory",
+                "hash_0lang",
+                "hash_rag",
+                "hash_graph",
+                "context",
+                "context_hash",
+                "rel_agent_needs_memory",
+                "rel_0memory_targets_memory",
+                "rel_0memory_compiled_with_0lang",
+                "rel_0memory_not_only_rag",
+                "rel_0memory_uses_graph_memory",
+                "proof"
+            ],
+            outputs: ["memory_record"]
+        }
+    ],
+
+    entry_point: "raw_utterance",
+    outputs: ["output.memory_record"],
+
+    metadata: {
+        author: "0-memory",
+        created: "2026-02-18",
+        tags: ["memory", "example", "compile", "0-memory"]
+    }
+}
